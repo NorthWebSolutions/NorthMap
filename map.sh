@@ -1,30 +1,7 @@
 #!/bin/bash
 
-
-#screen names:
-sc_map='map';				#not used at this point ***but it's implemented
-sc_minecraft="MineCraft"
-sc_RUN="BackupProcess"
-
-PUBLIC_URL="http://map.infocorp.hu"
-
-#MineCraft installation varriables:
-map_name="NorthCraft"
-map_folder_location="/srv/minecraft";
-
-#overviewer config files locations
-ov_config="/srv/minecraft_ov/new_config.cfg";
-
-#temp_location
-TEMP_DIR="/srv/minecraft_temp/";
-
-#Backup Location:
-BACKUP_DIR="/srv/minecraft_backups/"
-BACKUP_NAME="minecraft_save_$(date +%F_%H-%M).tar.gz"
-
-
-
-
+cd "/srv/minecraft_ov"
+source map.config
 
 ## SharedVars:
 sc_RUN_exist=-1
@@ -50,7 +27,7 @@ if [ ! -w "$DestFolder" ]
         echo "Directory $dnam is not writable"
         status_copy=1
 	else
-		#ELSE make a copy 
+		#ELSE make a copy
 		cp -r $SourceFolder $DestFolder
 		status_copy=0
 	fi
@@ -69,7 +46,7 @@ if [ ! -w "$DestFolder" ]
 	else
 		sc_RUN_exist=1
 	fi
-	  
+
 	}
 	function ch_screen_map ()
 	{
@@ -81,7 +58,7 @@ if [ ! -w "$DestFolder" ]
 	else
 		sc_map_exist=1
 	fi
-	  
+
 	}
 
 	function ch_screen_minecraft ()
@@ -94,7 +71,7 @@ if [ ! -w "$DestFolder" ]
 	else
 		sc_minecraft_exist=1
 	fi
-	  
+
 }
 function chk_sc ()
 {
@@ -161,7 +138,7 @@ function COPY_FILE_ROUTINE ()
 	#turn on world save:
 	screen -S $sc_minecraft -p 0 -X stuff "save-on^M"
 	screen -S $sc_minecraft -p 0 -X stuff "me World Save: §aOn ^M"
-		
+
 
 }
 
@@ -169,8 +146,8 @@ function helper ()
 {
 			#run map renderer from temp dir
 
-			echo "Y - Renderer new map, and make backup."
-			echo "N - skip renderer process and continue whit backup"
+			echo "M - Renderer new map, and make backup."
+			echo "B - skip renderer process and continue whit backup"
 			echo -e "S - Open new screen and start the rendering there \e[33m( This will skip backup ) \e[39m."
 			echo -e "F - Force renderer mode \e[33m( This will skip backup ) \e[39m."
 			echo -e "G - GenPoi Mode \e[33m( This will skip backup ) \e[39m."
@@ -186,26 +163,26 @@ function runme ()
 	ch_RUN_SC
 	ch_screen_minecraft
 
-	
+
 
 	if [ "$sc_minecraft_exist" == "0" ]; then
 			echo "MineCraft screen offscreen mode not allowed yet"
 			exit 1
-			
+
 		else
 			chk_sc
 			helper
-			read -p "Do you wish to continue?" answer
+			read -p "Plase select a task?" answer
 				case ${answer:0:1} in
-				
-					y|Y )
+
+					m|M )
 						START_ROUTINE
 						COPY_FILE_ROUTINE
 						MAP_ROUTINE
 						BACKUP_ROUTINE
 						STOP_ROUTINE
 					;;
-					n|N )
+					b|B )
 						START_ROUTINE
 						COPY_FILE_ROUTINE
 						BACKUP_ROUTINE
@@ -224,7 +201,7 @@ function runme ()
 					f|F )
 						COPY_FILE_ROUTINE
 						overviewer.py --force --config=$ov_config
-						
+
 					;;
 					g|G )
 						COPY_FILE_ROUTINE
@@ -240,8 +217,7 @@ function runme ()
 						exit 1
 				esac
 	fi
-	
+
 }
 runme
-
 
